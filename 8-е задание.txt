@@ -1,0 +1,13 @@
+SELECT *
+FROM clients 
+WHERE id IN ( SELECT DISTINCT p1.client_ref 
+			  FROM products AS p1
+ 			  INNER JOIN( SELECT * 
+						 FROM accounts AS a1 
+ 						 INNER JOIN(
+						 		SELECT  rc.acc_ref,
+    							SUM(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  								FROM records rc
+  								GROUP BY rc.acc_ref
+						 ) AS r1 ON a1.close_date IS NULL AND r1.acc_ref = a1.id AND r1.saldo >= 0.00)
+			  AS nc1 ON p1.id = nc1.client_ref AND p1.product_type_id = 1)

@@ -1,0 +1,23 @@
+
+--ALTER TABLE products ADD COLUMN summa NUMERIC(10,2)
+
+CREATE OR REPLACE FUNCTION product() RETURNS void AS
+$BODY$
+DECLARE
+	rec acc_saldo_dop%rowtype;
+BEGIN 
+	FOR rec IN SELECT a1.product_ref AS id,r1.max,r1.min 
+			   FROM accounts AS a1 INNER JOIN(SELECT rc.acc_ref, 	
+											         MAX(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END),
+											         MIN(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END)
+											  FROM records rc
+  											  GROUP BY rc.acc_ref) AS r1 ON a1.id  = r1.acc_ref 
+	LOOP
+		UPDATE products SET summa = rec.sum WHERE id = rec.id AND product_type_id = 1;
+		UPDATE products SET summa = rec.sum_min WHERE id = rec.id AND (product_type_id = 2 OR product_type_id = 3);
+	END LOOP;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+SELECT * FROM product()

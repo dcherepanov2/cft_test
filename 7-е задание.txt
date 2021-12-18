@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS acc_saldo_dop
+ (
+     id numeric(10,0) NOT NULL,
+     sum numeric(10,2) NOT NULL,
+	 sum_min numeric(10,2) NOT NULL,
+     CONSTRAINT acc_saldo_dop_pkey PRIMARY KEY (id)
+ )
+--выполнить сначала верхнюю
+
+CREATE OR REPLACE FUNCTION accountsCorrect() RETURNS void AS
+$BODY$
+DECLARE
+	rec acc_saldo_dop%rowtype;
+BEGIN
+	TRUNCATE acc_saldo_dop;
+	FOR rec IN SELECT  rc.acc_ref,
+    	SUM(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  		FROM records rc
+  		GROUP BY rc.acc_ref
+	LOOP
+		IF((SELECT saldo FROM accounts WHERE id = rec.id) != rec.sum) THEN
+			UPDATE accounts AS a1 SET saldo = rec.sum WHERE id =rec.id ;
+		END IF;
+	END LOOP;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+SELECT * FROM accountsCorrect()

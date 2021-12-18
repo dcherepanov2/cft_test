@@ -1,0 +1,20 @@
+
+--для проверки работы алгоритма можно провести select операцию
+
+SELECT * FROM products WHERE product_type_id = 1 AND 
+	  client_ref IN (SELECT a1.client_ref 
+					 FROM accounts AS a1 INNER JOIN (SELECT  rc.acc_ref,  SUM(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  					 								 FROM records rc
+													 GROUP BY rc.acc_ref) 
+					                                 AS rc2 ON rc2.acc_ref = a1.id AND rc2.saldo = 0.00
+)
+
+--операция закрытия кредитного счета
+UPDATE products SET close_date = date('now') 
+WHERE product_type_id = 1 AND 
+	  client_ref IN (SELECT a1.client_ref 
+					 FROM accounts AS a1 INNER JOIN (SELECT  rc.acc_ref,  SUM(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  					 								 FROM records rc
+													 GROUP BY rc.acc_ref) 
+					                                 AS rc2 ON rc2.acc_ref = a1.id AND rc2.saldo = 0.00
+)

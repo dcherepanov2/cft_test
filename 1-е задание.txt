@@ -1,0 +1,69 @@
+
+CREATE TABLE IF NOT EXISTS clients
+(
+    id numeric(10) NOT NULL,
+    name character varying(1000),
+    place_of_birth character varying(1000),
+    date_of_birth date,
+    address character varying(1000),
+    passport character varying(100),
+    CONSTRAINT clients_pk PRIMARY KEY (id)
+)
+
+CREATE TABLE IF NOT EXISTS tarifs
+(
+    id numeric(10) NOT NULL,
+    name character varying(100),
+    cost numeric(10,2),
+    CONSTRAINT tarifs_pk PRIMARY KEY (id)
+)
+
+CREATE TABLE IF NOT EXISTS producttype
+(
+    id numeric(10) NOT NULL,
+    name character varying(1000),
+    begin_date date,
+    end_date date,
+    tarif_ref numeric(10),
+    FOREIGN KEY (tarif_ref) REFERENCES tarifs(id),
+    CONSTRAINT product_type_pk PRIMARY KEY (id)
+)
+
+CREATE TABLE IF NOT EXISTS products
+(
+    id numeric(10) NOT NULL,
+    product_type_id numeric(10),
+    name character varying(100),
+    client_ref numeric(10),
+    open_date date,
+    close_date date,
+    FOREIGN KEY(product_type_id) REFERENCES producttype(id),
+    FOREIGN KEY(client_ref) REFERENCES clients(id),
+    CONSTRAINT products_pk PRIMARY KEY (id)
+)
+
+CREATE TABLE IF NOT EXISTS accounts
+(
+    id numeric(10) NOT NULL,
+    name character varying(100),
+    saldo numeric(10,2),
+    client_ref numeric(10),
+    open_date date,
+    close_date date,
+    product_ref numeric(10),
+    acc_num varchar(25),
+    FOREIGN KEY(product_ref) REFERENCES products(id),
+    FOREIGN KEY(client_ref) REFERENCES clients(id),
+    CONSTRAINT accounts_pk PRIMARY KEY (id)
+)
+
+CREATE TABLE IF NOT EXISTS records
+(
+    id numeric(10) NOT NULL,
+    dt numeric(1),
+    sum numeric(10,2),
+    acc_ref numeric(10),
+    open_date date,
+    FOREIGN KEY(acc_ref) REFERENCES accounts(id),
+    CONSTRAINT records_pk PRIMARY KEY (id)
+)

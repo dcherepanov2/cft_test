@@ -1,0 +1,13 @@
+SELECT * 
+FROM accounts 
+WHERE client_ref IN (
+	SELECT id 
+	FROM clients WHERE id NOT IN
+						/*product_type_id = 1 - КРЕДИТ*/
+						/*product_type_id = 2 - ДЕПОЗИТ*/	
+					   (SELECT c1.id 
+		 				FROM clients AS c1 INNER JOIN products AS p1 ON c1.id = p1.client_ref AND p1.product_type_id = 1)
+						AND id IN
+		 			    (SELECT c1.id 
+						 FROM clients AS c1 INNER JOIN products AS p1 ON c1.id = p1.client_ref AND p1.product_type_id = 2)
+)

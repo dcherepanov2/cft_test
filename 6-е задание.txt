@@ -1,0 +1,10 @@
+SELECT c1.name,rc3.open_date,rc3.sum 
+FROM clients AS c1 
+INNER JOIN (
+	SELECT client_ref,rc2.open_date,rc2.sum 
+	FROM accounts AS a1 INNER JOIN(
+		SELECT acc_ref,open_date,SUM(CASE WHEN r1.dt = 1 THEN r1.sum ELSE -1*r1.sum END)
+		FROM records AS r1 WHERE to_char(r1.open_date,'yyyy-mm') 
+		LIKE (SELECT to_char(date('now') - INTERVAL '1 month', 'yyyy-mm')) GROUP BY acc_ref,open_date
+	) as rc2 ON a1.id = rc2.acc_ref
+) AS rc3 ON c1.id = rc3.client_ref
