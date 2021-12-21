@@ -1,0 +1,10 @@
+UPDATE products 
+SET close_date = date('now')
+WHERE id IN (
+	SELECT product_ref 
+	FROM accounts
+	WHERE id NOT IN
+		(SELECT acc_ref 
+	 	 FROM records 
+		 WHERE open_date < date('now') AND open_date >= (SELECT date('now') - INTERVAL '1 month'))
+)

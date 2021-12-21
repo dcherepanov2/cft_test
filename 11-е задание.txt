@@ -1,0 +1,18 @@
+ALTER TABLE products ADD COLUMN summa NUMERIC(10,2)
+
+WITH rec AS(
+  SELECT a1.product_ref AS id,r1.max
+			   FROM accounts AS a1 INNER JOIN(SELECT rc.acc_ref, 	
+											         MAX(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END)
+											  FROM records rc
+  											  GROUP BY rc.acc_ref) AS r1 ON a1.id  = r1.acc_ref 
+  ) 
+UPDATE products AS p1 SET summa = (SELECT max FROM rec AS rc3 WHERE rc3.id = p1.id) WHERE product_type_id = 1;
+  WITH rec2 AS(
+  SELECT a1.product_ref AS id,r1.min 
+			   FROM accounts AS a1 INNER JOIN(SELECT rc.acc_ref,
+											         MIN(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END)
+											  FROM records rc
+  											  GROUP BY rc.acc_ref) AS r1 ON a1.id  = r1.acc_ref 
+  ) 
+UPDATE products AS p1 SET summa = (SELECT min FROM rec2 AS rc3 WHERE rc3.id = p1.id) WHERE product_type_id = 2 OR product_type_id = 3;

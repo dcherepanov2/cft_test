@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION accountsCorrect() RETURNS void AS
+$BODY$
+DECLARE
+BEGIN
+	WITH sum_saldo AS(
+	SELECT  rc.acc_ref,
+    	SUM(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  		FROM records rc
+  		GROUP BY rc.acc_ref
+	) UPDATE accounts as a2 SET saldo = (SELECT saldo FROM sum_saldo AS ss2 WHERE a2.id = 		ss2.acc_ref)
+	WHERE a2.id IN (SELECT acc_ref FROM sum_saldo AS ss1 WHERE ss1.saldo != (SELECT saldo FROM 	accounts AS a1 WHERE ss1.acc_ref = a1.id));
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+SELECT * FROM accountsCorrect()

@@ -1,0 +1,10 @@
+/*Взял дату 2015-10-01*/
+SELECT ptt1.name, AVG(inf.saldo) 
+FROM products as p1 
+JOIN (SELECT a1.product_ref, rc2.acc_ref, rc2.saldo 
+	  FROM accounts AS a1 
+	  JOIN (SELECT  rc.acc_ref, AVG(CASE WHEN rc.dt = 1 THEN rc.sum ELSE -1*rc.sum END) as saldo
+  			FROM records rc WHERE to_char(rc.open_date,'yyyy-mm-dd') = '2015-10-01'
+  			GROUP BY rc.acc_ref) AS rc2 ON rc2.acc_ref = a1.id) AS inf ON p1.id = inf.product_ref 
+LEFT JOIN producttype AS ptt1 ON ptt1.id = p1.product_type_id
+GROUP BY ptt1.name
